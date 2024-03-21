@@ -1,9 +1,14 @@
-variable "ami_image" {
+variable "instance_type" {
   type = string
-  default = "ami-0d7a109bf30624c99"
+  default = "t2.micro"
 }
 
-variable "ins_type" {
-  type = string
-  default = "t3.micro"
+variable "rules_map" {
+    type = map(string)
+    default = {
+      80 = "0.0.0.0/0"
+      443 = "192.168.1.0/24"
+      8080 = "192.168.1.0/24"
+      22 = "10.0.0.0/16"
+    }
 }

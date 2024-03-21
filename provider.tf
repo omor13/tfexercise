@@ -6,8 +6,8 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "tf-state-bucket-fadi"
-    key = "statefiles"
+    bucket = "fadi-tf-states-new"
+    key = "states/project.tfstate"
     region = "us-east-1"
   }
 }

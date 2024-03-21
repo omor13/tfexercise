@@ -1,6 +1,3 @@
-locals {
-  in_ports = [80,443,22,8080,8881]
-}
 
 
 data "aws_ami" "ubuntu" {
@@ -14,13 +11,13 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "webserver" {
     count = 3
     ami = data.aws_ami.ubuntu.id
-    instance_type = var.ins_type
-    lifecycle {
-        create_before_destroy = true
-    }
+    instance_type = var.instance_type
+    subnet_id = aws_subnet.testsubnet.id
+
+    vpc_security_group_ids = [aws_security_group.test-sg.id]
 
     tags = {
-      Name = "webserver${count.index+1}"
+      Name = "Webserver-${count.index+1}"
     }
 }
 
@@ -28,18 +25,23 @@ resource "aws_vpc" "testvpc" {
     cidr_block = "10.0.1.0/24"
 }
 
+resource "aws_subnet" "testsubnet" {
+  cidr_block = "10.0.1.0/27"
+  vpc_id = aws_vpc.testvpc.id
+}
+
 resource "aws_security_group" "test-sg" {
     name = "test-sg"
     description = "security group fo testing"
     vpc_id = aws_vpc.testvpc.id
     dynamic "ingress" {
-        for_each = local.in_ports
-        content {
-          from_port = ingress.value
-          to_port = ingress.value
-          protocol = "tcp"
-          cidr_blocks = ["0.0.0.0/0"]
-        }
+      for_each = var.rules_map 
+      content {
+        from_port = ingress.key
+        to_port = ingress.key
+        protocol = "tcp"
+        cidr_blocks = [ingress.value]
+      }
     }
 }
 
